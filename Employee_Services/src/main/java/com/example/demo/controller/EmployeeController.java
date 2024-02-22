@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.Employee;
 import com.example.demo.mapper.EmployeeDTO;
+import com.example.demo.response.ApiResponseDTO;
 import com.example.demo.response.DeleteResponse;
 import com.example.demo.services.EmployeeServices;
 
@@ -37,10 +38,10 @@ public class EmployeeController {
 	}
 
 	@GetMapping("/getSingle/{id}")
-	public ResponseEntity<EmployeeDTO> getSingleEmp(@PathVariable int id) {
+	public ResponseEntity<ApiResponseDTO> getSingleEmp(@PathVariable int id) {
 
-		EmployeeDTO singleEmp = this.employeeServices.getSingleEmployee(id);
-		return new ResponseEntity<>(singleEmp, HttpStatus.CREATED);
+		 ApiResponseDTO singleEmployee = this.employeeServices.getSingleEmployee(id);
+		return new ResponseEntity<>(singleEmployee, HttpStatus.CREATED);
 
 	}
 

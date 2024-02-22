@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.example.demo.entity.Employee;
 import com.example.demo.mapper.EmployeeDTO;
+import com.example.demo.response.ApiResponseDTO;
 
 public interface EmployeeServices {
 	
 	EmployeeDTO createEmployee(EmployeeDTO emp);
 	
-	EmployeeDTO getSingleEmployee(int id);
+	ApiResponseDTO getSingleEmployee(int id);
 	
 	List<EmployeeDTO> getAllEmployee();
 	

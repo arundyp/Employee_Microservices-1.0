@@ -5,13 +5,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.demo.entity.Employee;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.RespourceNotFoundException;
+import com.example.demo.mapper.DepartmentDTO;
 import com.example.demo.mapper.EmployeeDTO;
 import com.example.demo.repository.EmployeeRepository;
+import com.example.demo.response.ApiResponseDTO;
 import com.example.demo.services.EmployeeServices;
 
 import lombok.AllArgsConstructor;
@@ -24,6 +28,7 @@ public class EmployeeServiceImpl implements EmployeeServices {
 
 	private EmployeeRepository employeeRepository;
 	private ModelMapper mapper;
+	private RestTemplate restTemplate;
 
 	@Override
 	public EmployeeDTO createEmployee(EmployeeDTO emp) {
@@ -31,6 +36,7 @@ public class EmployeeServiceImpl implements EmployeeServices {
 		Employee employee = this.mapper.map(emp, Employee.class);
 
 		Optional<Employee> findByEmail = this.employeeRepository.findByEmail(emp.getEmail());
+		log.info("Email address is:{}" + findByEmail);
 
 		if (findByEmail.isPresent()) {
 			throw new EmailAlreadyExistsException("Email is already registered: " + emp.getEmail());
@@ -38,17 +44,31 @@ public class EmployeeServiceImpl implements EmployeeServices {
 
 		this.employeeRepository.save(employee);
 		EmployeeDTO employeeDTO = this.mapper.map(employee, EmployeeDTO.class);
+		log.info("Employee DTO is:{}" + employeeDTO);
 		return employeeDTO;
 	}
 
 	@Override
-	public EmployeeDTO getSingleEmployee(int id) {
+	public ApiResponseDTO getSingleEmployee(int id) {
 
-		Employee orElseThrow = this.employeeRepository.findById(id)
+		 Employee employee = this.employeeRepository.findById(id)
 				.orElseThrow(() -> new RespourceNotFoundException("Resource not found"));
 
-		EmployeeDTO map = this.mapper.map(orElseThrow, EmployeeDTO.class);
-		return map;
+		// DepartmentDTO departmentDTO =
+		// restTemplate.getForObject("localhost:9092/dept/api/deptId/DT411005",
+		// DepartmentDTO.class);
+		 ResponseEntity<DepartmentDTO> forEntity = restTemplate.getForEntity(
+				 "http://localhost:9092/dept/api/deptId/"+employee.getDepartmentCode(),
+				DepartmentDTO.class);
+		 DepartmentDTO departmentDTO = forEntity.getBody();
+		 
+		 
+		EmployeeDTO employeeDTO = this.mapper.map(employee, EmployeeDTO.class);
+		ApiResponseDTO apiDto = new ApiResponseDTO();
+		apiDto.setDepartmentDTO(departmentDTO);
+		apiDto.setEmployeeDto(employeeDTO);
+
+		return  apiDto;
 	}
 
 	@Override
